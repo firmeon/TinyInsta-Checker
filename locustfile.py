@@ -1,7 +1,10 @@
 import os
 import subprocess
 import csv
+import itertools
 from locust import HttpUser, task, between, events
+
+user_id_generator = itertools.count(1)
 
 # Configuration des fichiers de sortie
 OUT_DIR = "out"
@@ -33,12 +36,12 @@ class TinyInstaUser(HttpUser):
     
     def on_start(self):
         """ Initialisation : on pourrait choisir un ID utilisateur au hasard ici """
-        self.user_id = "user1" # À dynamiser selon votre génération de données
+        self.user_id = "user" + str(next(user_id_generator))
 
     @task
     def get_timeline(self):
         """ Simule la requête de récupération de la timeline """
-        with self.client.get(f"/api/timeline?user={self.user_id}", catch_response=True) as response:
+        with self.client.get(f"/api/timeline?user={self.user_id}", name="/api/timeline", catch_response=True) as response:
             if response.status_code == 200:
                 response.success()
             else:
