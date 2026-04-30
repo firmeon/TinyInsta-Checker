@@ -27,7 +27,7 @@ def run_locust_session(users, param_value, filename, run_id):
         "--headless",
         "-u", str(users),
         "-r", "100",
-        "--run-time", "1s",
+        "--run-time", "1min",
         "--host", BASE_URL,
         "--only-summary"
     ]
@@ -35,7 +35,7 @@ def run_locust_session(users, param_value, filename, run_id):
     # Exécution de la commande
     subprocess.run(cmd, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     # Petite pause pour laisser le Cloud respirer entre deux runs
-    time.sleep(20)
+    time.sleep(60)
 
 def supprimer_fichier_si_existe(filepath):
     if os.path.exists(filepath):
@@ -90,7 +90,7 @@ def experience_fanout():
     peupler_database(nb_user_total=1000, nb_posts_to_create=50, follow_to_add=0)
 
     #fanout_levels = [20, 40, 60]
-    fanout_levels = [20]
+    fanout_levels = [20, 40]
     last_follow = 20
 
     print("Début du benchmark de fanout...")

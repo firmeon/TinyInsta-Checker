@@ -1,3 +1,5 @@
-locust==2.43.4
-requests==2.33.1
-google-cloud-datastore==2.15.0
+locust
+requests
+google-cloud-datastore
+pandas
+matplotlib
