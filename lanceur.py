@@ -74,7 +74,7 @@ def experience_concurrence():
     # --- EXPÉRIENCE 1 : PASSAGE À L'ÉCHELLE SUR LA CHARGE (CONCURRENCE) ---
     # Paramètres : 1, 10, 20, 50, 100, 1000 utilisateurs
     #concurrence_levels = [1, 10, 20, 50, 100, 1000]
-    concurrence_levels = [1, 10, 20, 50]
+    concurrence_levels = [1, 10, 20]
 
     print("Début du benchmark de concurrence...")
     for user in concurrence_levels:
