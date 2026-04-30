@@ -2,6 +2,8 @@ import os
 import time
 import subprocess
 
+from google.cloud import datastore
+
 # Configuration
 BASE_URL = "https://tinyinsta-gcp.ew.r.appspot.com"
 LOCUST_FILE = "locustfile.py"
@@ -34,9 +36,21 @@ def run_locust_session(users, param_value, filename, run_id):
     time.sleep(5)
 
 def delete_base():
-    print("Suppression de la base de données...")
-    subprocess.run(["gcloud", "datastore", "indexes", "cleanup"])
-    subprocess.run(["gcloud", "datastore", "entities", "delete", "--all-kinds"])
+    client = datastore.Client()
+    # Liste des Kinds utilisés dans TinyInsta
+    kinds = ["User", "Post"] 
+
+    for kind in kinds:
+        print(f"Suppression des entités du type : {kind}...")
+        query = client.query(kind=kind)
+        query.keys_only() # On ne récupère que les clés pour aller plus vite
+        
+        keys = list([entity.key for entity in query.fetch()])
+        
+        # Datastore limite les suppressions par lots à 500 entités
+        for i in range(0, len(keys), 500):
+            batch = keys[i:i + 500]
+            client.delete_multi(batch)
 
 def main():
     if not os.path.exists(OUT_DIR):
