@@ -44,6 +44,12 @@ def supprimer_fichier_si_existe(filepath):
 
 
 def vider_database():
+    cmd = [
+        "gcloud", "datastore", "entities", "delete", "$(gcloud datastore entities list --kind=Post --format=\"value(key.id)\")"
+    ]
+    subprocess.run(cmd)
+
+
     client = datastore.Client()
     # Liste des Kinds utilisés dans TinyInsta
     kinds = ["User", "Post"] 
