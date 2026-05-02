@@ -111,6 +111,10 @@ def main():
 
     vider_database()
 
+    for i in range(9):
+        peupler_database(nb_user_total=100 * (i + 1), nb_posts_to_create=0, follow_to_add=0)
+
+
     peupler_database(nb_user_total=1000, nb_posts_to_create=50, follow_to_add=20)
 
     experience_concurrence()
