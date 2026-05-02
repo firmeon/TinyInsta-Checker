@@ -119,3 +119,4 @@ def main():
 if __name__ == "__main__":
     #main()
     vider_database()
+    peupler_database(nb_user_total=1000, nb_posts_to_create=50, follow_to_add=20)
