@@ -78,8 +78,7 @@ def peupler_database(nb_user_total, nb_posts_to_create, follow_to_add):
         "--users", str(nb_user_total),
         "--posts", str(nb_posts_to_create),
         "--follows-min", str(follow_to_add),
-        "--follows-max", str(follow_to_add),
-        "--dry-run"
+        "--follows-max", str(follow_to_add)
     ]
     subprocess.run(cmd, env=os.environ.copy())
 
@@ -125,7 +124,7 @@ def main():
 
     vider_database()
 
-    peupler_database(nb_user_total=100, nb_posts_to_create=5000, follow_to_add=20)
+    peupler_database(nb_user_total=1000, nb_posts_to_create=50000, follow_to_add=20)
 
     ##experience_concurrence()
     ##experience_fanout()
