@@ -117,4 +117,5 @@ def main():
     experience_fanout()
 
 if __name__ == "__main__":
-    main()
+    #main()
+    vider_database()
