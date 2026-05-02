@@ -3,6 +3,7 @@ import time
 import subprocess
 import pandas as pd
 import matplotlib.pyplot as plt
+from google.api_core import exceptions
 
 from google.cloud import datastore
 
@@ -44,47 +45,34 @@ def supprimer_fichier_si_existe(filepath):
 
 
 def vider_database():
-    import subprocess
-
-def vider_database_robuste():
-    # Liste des Kinds à nettoyer pour TinyInsta
+    """Supprime toutes les entités User et Post de manière synchrone."""
     kinds = ["User", "Post"]
+    client = datastore.Client()
     
     for kind in kinds:
-        print(f"Nettoyage du type {kind}...")
-        try:
-            # On utilise 'gcloud firestore' qui gère le Datastore
-            # Cette commande est beaucoup plus directe
-            cmd = [
-                "gcloud", "firestore", "bulk-delete",
-                f"--kinds={kind}",
-                "--quiet" # Pour éviter la demande de confirmation (y/n)
-            ]
-            
-            # On exécute la commande
-            subprocess.run(cmd, check=True)
-            print(f"  ✓ Type {kind} vidé.")
-            
-        except subprocess.CalledProcessError as e:
-            print(f"  ✗ Erreur gcloud : {e}")
-"""
-    client = datastore.Client()
-    # Liste des Kinds utilisés dans TinyInsta
-    kinds = ["User", "Post"] 
-
-    for kind in kinds:
-        print(f"Suppression des entités du type : {kind}")
+        print(f"Vidage du type : {kind}")
         
         while True:
-            query = client.query(kind=kind)
-            query.keys_only()
-            
-            # Limite de suppression à 500 entités par itération pour éviter les timeouts (imposé par Datastore)
-            keys = [entity.key for entity in query.fetch(limit=500)]
-            if not keys:
-                break # Plus rien à supprimer pour ce type
-            client.delete_multi(keys)
-"""
+            try:
+                # On utilise keys_only pour minimiser la charge réseau et éviter les 504 au fetch
+                query = client.query(kind=kind)
+                query.keys_only()
+                
+                # On récupère les clés par petits lots (500 est le max pour delete_multi)
+                keys = [entity.key for entity in query.fetch(limit=500)]
+                
+                if not keys:
+                    break
+                
+                client.delete_multi(keys)
+                
+            except (exceptions.DeadlineExceeded, exceptions.ServiceUnavailable, exceptions.GatewayTimeout):
+                # En cas de 504 ou timeout, on attend un peu et on recommence la boucle
+                print(f"  ! Timeout sur {kind}, nouvelle tentative...")
+                time.sleep(1)
+                continue
+
+    print("Base de données nettoyée.")
 
 def peupler_database(nb_user_total, nb_posts_to_create, follow_to_add):
     print(f"Peuplement de la base de données (users: {nb_user_total}, posts: {nb_posts_to_create}, follows: {follow_to_add})")
@@ -114,7 +102,7 @@ def experience_fanout():
     # Consigne : 50 users simultanés, faire varier followees : 20, 40, 60
 
     # On ajoute 50 posts pour chaque utilisateur, on a déjà 20 follow par personne
-    peupler_database(nb_user_total=1000, nb_posts_to_create=50, follow_to_add=0)
+    peupler_database(nb_user_total=1000, nb_posts_to_create=50000, follow_to_add=0)
 
     fanout_levels = [20, 40, 60]
     last_follow = 20
