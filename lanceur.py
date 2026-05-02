@@ -47,16 +47,18 @@ def vider_database():
     kinds = ["User", "Post"] 
 
     for kind in kinds:
-        print(f"Suppression des entités du type : {kind}...")
-        query = client.query(kind=kind)
-        query.keys_only() # On ne récupère que les clés pour aller plus vite
+        print(f"Suppression des entités du type : {kind}")
         
-        keys = list([entity.key for entity in query.fetch()])
-        
-        # Datastore limite les suppressions par lots à 500 entités
-        for i in range(0, len(keys), 500):
-            batch = keys[i:i + 500]
-            client.delete_multi(batch)
+        while True:
+            query = client.query(kind=kind)
+            query.keys_only()
+            
+            # Limite de suppression à 500 entités par itération pour éviter les timeouts (imposé par Datastore)
+            keys = [entity.key for entity in query.fetch(limit=500)]
+            if not keys:
+                break # Plus rien à supprimer pour ce type
+            client.delete_multi(keys)
+
 
 def peupler_database(nb_user_total, nb_posts_to_create, follow_to_add):
     """infos = {
@@ -70,6 +72,7 @@ def peupler_database(nb_user_total, nb_posts_to_create, follow_to_add):
     if response.status_code != 200:
         print(f"Erreur lors du peuplement de la base : {response.status_code} - {response.text}")
     """
+    print(f"Peuplement de la base de données (users: {nb_user_total}, posts: {nb_posts_to_create}, follows: {follow_to_add})")
     cmd = [
         "python3", "seed.py",
         "--users", str(nb_user_total),
@@ -78,7 +81,7 @@ def peupler_database(nb_user_total, nb_posts_to_create, follow_to_add):
         "--follows-max", str(follow_to_add),
         "--dry-run"
     ]
-    subprocess.run(cmd)
+    subprocess.run(cmd, env=os.environ.copy())
 
 
 def experience_concurrence():
@@ -87,7 +90,7 @@ def experience_concurrence():
     #concurrence_levels = [1, 10, 20, 50, 100, 1000]
     concurrence_levels = [1, 10, 20]
 
-    print("Début du benchmark de concurrence...")
+    print("Début du test de concurrence")
     for user in concurrence_levels:
         for run in range(1, 4): # Répété 3 fois
             run_locust_session(user, param_value=user, filename="conc.csv", run_id=run)
@@ -104,7 +107,7 @@ def experience_fanout():
     fanout_levels = [20, 40]
     last_follow = 20
 
-    print("Début du benchmark de fanout...")
+    print("Début du test de fanout")
     for followees in fanout_levels:
         peupler_database(nb_user_total=1000, nb_posts_to_create=0, follow_to_add=followees - last_follow)
         last_follow = followees
@@ -115,7 +118,7 @@ def main():
     if not os.path.exists(OUT_DIR):
         os.makedirs(OUT_DIR)
 
-    print("Nettoyage des anciens résultats et de la base...")
+    print("Nettoyage des anciens résultats et de la base")
 
     supprimer_fichier_si_existe(os.path.join(OUT_DIR, "conc.csv"))
     supprimer_fichier_si_existe(os.path.join(OUT_DIR, "fanout.csv"))
