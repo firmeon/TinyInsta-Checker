@@ -44,12 +44,30 @@ def supprimer_fichier_si_existe(filepath):
 
 
 def vider_database():
-    cmd = [
-        "gcloud", "datastore", "entities", "delete", "$(gcloud datastore entities list --kind=Post --format=\"value(key.id)\")"
-    ]
-    subprocess.run(cmd)
+    import subprocess
 
-
+def vider_database_robuste():
+    # Liste des Kinds à nettoyer pour TinyInsta
+    kinds = ["User", "Post"]
+    
+    for kind in kinds:
+        print(f"Nettoyage du type {kind}...")
+        try:
+            # On utilise 'gcloud firestore' qui gère le Datastore
+            # Cette commande est beaucoup plus directe
+            cmd = [
+                "gcloud", "firestore", "bulk-delete",
+                f"--kinds={kind}",
+                "--quiet" # Pour éviter la demande de confirmation (y/n)
+            ]
+            
+            # On exécute la commande
+            subprocess.run(cmd, check=True)
+            print(f"  ✓ Type {kind} vidé.")
+            
+        except subprocess.CalledProcessError as e:
+            print(f"  ✗ Erreur gcloud : {e}")
+"""
     client = datastore.Client()
     # Liste des Kinds utilisés dans TinyInsta
     kinds = ["User", "Post"] 
@@ -66,7 +84,7 @@ def vider_database():
             if not keys:
                 break # Plus rien à supprimer pour ce type
             client.delete_multi(keys)
-
+"""
 
 def peupler_database(nb_user_total, nb_posts_to_create, follow_to_add):
     print(f"Peuplement de la base de données (users: {nb_user_total}, posts: {nb_posts_to_create}, follows: {follow_to_add})")
