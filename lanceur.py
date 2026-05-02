@@ -10,7 +10,6 @@ from google.cloud import datastore
 BASE_URL = "https://tinyinsta-gcp.ew.r.appspot.com"
 LOCUST_FILE = "locustfile.py"
 OUT_DIR = "out"
-TOKEN = "change-me-seed-token"
 
 def run_locust_session(users, param_value, filename, run_id):
     """Lance une instance de Locust en mode headless avec des variables d'env."""
@@ -38,9 +37,11 @@ def run_locust_session(users, param_value, filename, run_id):
     # Pause de 2 minutes pour laisser le Cloud respirer entre deux runs
     time.sleep(120)
 
+
 def supprimer_fichier_si_existe(filepath):
     if os.path.exists(filepath):
         os.remove(filepath)
+
 
 def vider_database():
     client = datastore.Client()
@@ -62,17 +63,6 @@ def vider_database():
 
 
 def peupler_database(nb_user_total, nb_posts_to_create, follow_to_add):
-    """infos = {
-        "users": nb_user_total,
-        "posts": nb_posts_to_create,
-        "follows_min": follow_to_add,
-        "follows_max": follow_to_add,
-        "prefix": prefix
-    }
-    response = requests.post(f"{BASE_URL}/admin/seed?token={TOKEN}", data=infos, timeout=None)
-    if response.status_code != 200:
-        print(f"Erreur lors du peuplement de la base : {response.status_code} - {response.text}")
-    """
     print(f"Peuplement de la base de données (users: {nb_user_total}, posts: {nb_posts_to_create}, follows: {follow_to_add})")
     cmd = [
         "python3", "seed.py",
@@ -112,6 +102,7 @@ def experience_fanout():
         for run in range(1, 4):
             run_locust_session(50, param_value=followees, filename="fanout.csv", run_id=run)
 
+
 def create_barplot(csv_file, output_name, title, xlabel):
     if not os.path.exists(csv_file):
         print(f"Fichier {csv_file} introuvable.")
@@ -149,6 +140,7 @@ def create_barplot(csv_file, output_name, title, xlabel):
     plt.savefig(output_name)
     print(f"Graphique sauvegardé sous : {output_name}")
     plt.close()
+
 
 def main():
     if not os.path.exists(OUT_DIR):
