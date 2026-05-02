@@ -58,8 +58,8 @@ def vider_database():
             batch = keys[i:i + 500]
             client.delete_multi(batch)
 
-def peupler_database(nb_user_total, nb_posts_to_create, follow_to_add, prefix):
-    infos = {
+def peupler_database(nb_user_total, nb_posts_to_create, follow_to_add):
+    """infos = {
         "users": nb_user_total,
         "posts": nb_posts_to_create,
         "follows_min": follow_to_add,
@@ -69,6 +69,16 @@ def peupler_database(nb_user_total, nb_posts_to_create, follow_to_add, prefix):
     response = requests.post(f"{BASE_URL}/admin/seed?token={TOKEN}", data=infos, timeout=None)
     if response.status_code != 200:
         print(f"Erreur lors du peuplement de la base : {response.status_code} - {response.text}")
+    """
+    cmd = [
+        "python3", "seed.py",
+        "--users", str(nb_user_total),
+        "--posts", str(nb_posts_to_create),
+        "--follows-min", str(follow_to_add),
+        "--follows-max", str(follow_to_add),
+        "--dry-run"
+    ]
+    subprocess.run(cmd)
 
 
 def experience_concurrence():
@@ -112,8 +122,7 @@ def main():
 
     vider_database()
 
-    for i in range(9):
-        peupler_database(nb_user_total=100, nb_posts_to_create=5000, follow_to_add=20, prefix=f"test{i}_")
+    peupler_database(nb_user_total=100, nb_posts_to_create=5000, follow_to_add=20)
 
     ##experience_concurrence()
     ##experience_fanout()
