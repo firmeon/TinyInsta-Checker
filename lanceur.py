@@ -65,7 +65,7 @@ def peupler_database(nb_user_total, nb_posts_to_create, follow_to_add):
         "follows_min": follow_to_add,
         "follows_max": follow_to_add
     }
-    response = requests.post(f"{BASE_URL}/admin/seed?token={TOKEN}", data=infos)
+    response = requests.post(f"{BASE_URL}/admin/seed?token={TOKEN}", data=infos, timeout=None)
     if response.status_code != 200:
         print(f"Erreur lors du peuplement de la base : {response.status_code} - {response.text}")
 
