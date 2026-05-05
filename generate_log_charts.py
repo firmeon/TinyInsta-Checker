@@ -1,6 +1,6 @@
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
-import os
 
 def create_barplot(csv_file, output_name, title, xlabel):
     if not os.path.exists(csv_file):
@@ -34,18 +34,14 @@ def create_barplot(csv_file, output_name, title, xlabel):
     plt.xlabel(xlabel)
     plt.ylabel("Temps moyen par requête (ms)")
     plt.grid(axis='y', linestyle='--', alpha=0.7)
+    plt.yscale("log")
     
     # Sauvegarde du fichier PNG
     plt.savefig(output_name)
     print(f"Graphique sauvegardé sous : {output_name}")
     plt.close()
 
-# Génération des deux graphiques demandés
-if __name__ == "__main__":
-    create_barplot('out/conc.csv', 'conc.png', 
-                   "Temps moyen par requête selon la concurrence", 
-                   "Nombre d'utilisateurs concurrents")
-    
-    create_barplot('out/fanout.csv', 'fanout.png', 
-                   "Temps moyen par requête selon le nombre d'abonnés", 
-                   "Nombre de followees (Abonnés)")
+
+create_barplot('out/conc.csv', 'conc.png', 
+                "Temps moyen par requête selon la concurrence", 
+                "Nombre d'utilisateurs concurrents")
