@@ -42,6 +42,6 @@ def create_barplot(csv_file, output_name, title, xlabel):
     plt.close()
 
 
-create_barplot('out/conc.csv', 'conc.png', 
+create_barplot('out/conc.csv', 'conc_log.png', 
                 "Temps moyen par requête selon la concurrence", 
                 "Nombre d'utilisateurs concurrents")
